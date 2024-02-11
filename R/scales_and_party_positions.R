@@ -43,3 +43,69 @@ compute_scale_scores <- function(factanal_object, survey_data, scale_order) {
 
   return(scale_scores)
 }
+
+
+#' Read a Single ODS File and Append Filename as a Column
+#'
+#' This function reads a single ODS file from the specified path,
+#' appends the filename (without extension) as a new column to the data,
+#' and returns the modified data frame. The filename is used to identify
+#' the source of the data within the returned data frame.
+#'
+#' @param path The file path to the ODS file to be read.
+#'
+#' @return A data frame with the contents of the ODS file and an additional
+#'         column named `coder` containing the filename from which the data was read.
+#'
+#' @examples
+#' # Assuming you have an ODS file named "data_file.ods" in your working directory:
+#' path <- system.file("extdata", "data_file.ods", package = "YourPackageName")
+#' data <- read_one_file(path)
+#'
+#' @importFrom tools file_path_sans_ext
+#' @importFrom readODS read_ods
+#' @export
+read_one_file <- function(path) {
+  filename <- tools::file_path_sans_ext(basename(path))
+  data <- readODS::read_ods(path)
+  data$coder <- filename
+  return(data)
+}
+
+
+#' Aggregate Party Positions from Survey Data
+#'
+#' Reads multiple ODS files from a specified directory, excluding any templates, and aggregates the data
+#' into a single dataframe. It then pivots the data from wide to long format based on specified column names
+#' and calculates the mean position for each party by variable.
+#'
+#' @param path The directory path containing ODS files to read.
+#' @param colnames Vector of column names to pivot from wide to long format, representing parties.
+#'
+#' @return A tibble data frame in long format with variables for each party and their mean positions.
+#'
+#' @importFrom dplyr bind_rows group_by summarise
+#' @importFrom tidyr pivot_longer
+#' @import readODS
+#' @import tools
+#' @export
+#' @examples
+#' # This example assumes you have a directory with ODS files for party position data
+#' # Replace `path_to_directory` with the actual path to your ODS files
+#' aggregate_party_positions("path_to_directory", c("CAQ", "PLQ", "QS", "PQ", "PCQ"))
+aggregate_party_positions <- function(path, colnames) {
+  files <- list.files(path, full.names = TRUE)
+  # Remove template files
+  files <- files[grep("template", files, invert = TRUE)]
+
+  # Read files, append filename as a coder column, and combine
+  wide <- dplyr::bind_rows(lapply(files, read_one_file))
+
+  # Pivot data to long format and calculate mean position by party and variable
+  df <- tidyr::pivot_longer(wide, cols = colnames, names_to = "party", values_to = "position") %>%
+    dplyr::group_by(VARIABLE, party) %>%
+    dplyr::summarise(position = mean(position, na.rm = TRUE), .groups = 'drop')
+
+  return(df)
+}
+
