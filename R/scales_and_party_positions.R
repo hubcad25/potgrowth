@@ -23,7 +23,7 @@ compute_scale_scores <- function(factanal_object, survey_data, scale_order) {
   }
 
   # Convert survey_data and the wanted variables in matrix for matrix operations
-  data_matrix <- as.matrix(survey_data[names(loadings)])
+  data_matrix <- as.matrix(survey_data[names(loadings),])
 
   # Ensure loadings are in a matrix format for matrix multiplication
   loadings_matrix <- matrix(loadings, ncol = length(loadings))
