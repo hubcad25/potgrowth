@@ -1,4 +1,5 @@
 library(testthat)
+# Supposons que votre package s'appelle potgrowth, comme vous l'avez indiqué
 library(potgrowth)
 
 # Créer des données factices pour les tests
@@ -9,9 +10,13 @@ scale_order <- 1
 
 # Test 1: Vérifier que la fonction retourne des valeurs correctes pour des données d'entrée valides
 test_that("compute_scale_scores returns correct values", {
-  expected_scores <- c(0.5 * 1 + 0.2 * 3 - 0.7 * 2,
-                       0.5 * 2 + 0.2 * 0 - 0.7 * 3,
-                       0.5 * 3 + 0.2 * 1 - 0.7 * 1)
+  raw_scores <- c(0.5 * 1 + 0.2 * 3 - 0.7 * 2,
+                  0.5 * 2 + 0.2 * 0 - 0.7 * 3,
+                  0.5 * 3 + 0.2 * 1 - 0.7 * 1)
+  # Ajuster pour que le score minimum soit 0
+  adjusted_scores <- raw_scores - min(raw_scores)
+  # Normaliser les scores pour qu'ils soient entre 0 et 1
+  expected_scores <- adjusted_scores / max(adjusted_scores)
   computed_scores <- compute_scale_scores(factanal_object, survey_data, scale_order)
   expect_equal(computed_scores, expected_scores)
 })

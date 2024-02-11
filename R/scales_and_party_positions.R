@@ -27,6 +27,19 @@ compute_scale_scores <- function(factanal_object, survey_data, scale_order) {
 
   # Matrix operation to compute scale scores
   scale_scores <- data_matrix %*% loadings
+  scale_scores <- scale_scores[, 1]
 
-  return(scale_scores[, 1])
+  ## Adjust scale scores if any are less than 0
+  min_score <- min(scale_scores)
+  if (min_score < 0) {
+    scale_scores <- scale_scores - min_score # Augmenter pour que min soit 0
+  }
+
+  ## Normaliser les scores pour qu'ils soient entre 0 et 1
+  max_score <- max(scale_scores)
+  if (max_score > 0) { # Éviter la division par zéro
+    scale_scores <- scale_scores / max_score
+  }
+
+  return(scale_scores)
 }
