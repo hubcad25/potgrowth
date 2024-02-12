@@ -160,4 +160,63 @@ compute_party_scales <- function(aggregated_issue_positions,
 }
 
 
+#' Compute Attitude Gaps Between Party Positions and Survey Data
+#'
+#' Calculates the attitude gaps between party positions on various scales and individual responses
+#' in survey data. This function allows for a comparison of positions on key political or ideological
+#' scales between parties and survey respondents.
+#'
+#' @param party_scales_matrix A matrix containing the party positions on different scales.
+#'        This is expected to be the output from `potgrowth::compute_party_scales`.
+#' @param survey_data A data frame or list where each element/column represents respondent scores
+#'        on the same scales as those in `party_scales_matrix`.
+#' @param output Character string specifying the output format.
+#'        If "cbind", the function returns the `survey_data` combined with the calculated attitude gaps.
+#'        Defaults to "cbind".
+#'
+#' @return Depending on the `output` parameter, this function returns a data frame with the original
+#'         `survey_data` combined with the calculated attitude gaps as additional columns.
+#'
+#' @importFrom dplyr select
+#' @importFrom tidyr pivot_longer pivot_wider
+#' @importFrom stats setNames
+#' @examples
+#' # Assuming party_scales_matrix and survey_data are already defined:
+#' gaps_df <- compute_attitude_gaps(party_scales_matrix, survey_data)
+#' print(gaps_df)
+#'
+#' @export
+compute_attitude_gaps <- function(
+    party_scales_matrix,
+    survey_data,
+    output = "cbind"
+){
+  if (sum(!(colnames(party_scales_matrix) %in% names(survey_data))) > 0){
+    stop(message("Scales from party_scales_matrix are not in survey_data."))
+  }
+  parties <- rownames(party_scales_matrix)
+  scales <- colnames(party_scales_matrix)
+  gaps_list <- lapply(
+    X = parties,
+    FUN = function(party){
+      gaps_matrix <- sapply(
+        X = scales,
+        FUN = function(scale){
+          matrix <- survey_data[[scale]] - party_scales_matrix[party, scale]
+          return(matrix)
+        }
+      )
+      colnames(gaps_matrix) <- paste0("attitudegap_", party, "_", scales)
+      return(gaps_matrix)
+    }
+  )
+  names(gaps_list) <- parties
+  if (output == "cbind"){
+    df_gaps <- cbind(survey_data, do.call(cbind, gaps_list))
+    return(df_gaps)
+  }
+}
+
+
+
 
