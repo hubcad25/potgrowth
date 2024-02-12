@@ -144,14 +144,14 @@ compute_party_scales <- function(aggregated_issue_positions,
   wide <- aggregated_issue_positions %>%
     tidyr::pivot_wider(., names_from = "VARIABLE",
                        values_from = "position") %>%
-    mutate(party = factor(party, levels = unique(aggregated_issue_positions$party))) %>%
-    arrange(party)
+    dplyr::mutate(party = factor(party, levels = unique(aggregated_issue_positions$party))) %>%
+    dplyr::arrange(party)
   ## check if rownames from df are in the same exact order as wide$party
   if (sum((rownames(df) != wide$party)) > 0){
     stop(message("Rownames from df are not in the same order as the party column in wide."))
   }
   party_scales_matrix <- sapply(X = 1:length(scale_names),
-                                FUN = potgrowth::compute_scale_scores,
+                                FUN = compute_scale_scores,
                                 factanal_object = factanal_object,
                                 survey_data = wide)
   rownames(party_scales_matrix) <- unique(aggregated_issue_positions$party)
