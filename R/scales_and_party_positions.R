@@ -109,3 +109,55 @@ aggregate_party_positions <- function(path, colnames) {
   return(df)
 }
 
+
+#' Compute Party Scales from Aggregated Issue Positions
+#'
+#' This function takes aggregated issue positions for different parties, a factor analysis object,
+#' and a vector of scale names. It returns a matrix of scale scores for each party based on
+#' the specified scales in the factor analysis object.
+#'
+#' @param aggregated_issue_positions A data frame of aggregated issue positions for parties.
+#'        Expected to be the output from `potgrowth::aggregate_party_positions`.
+#' @param factanal_object A factor analysis object containing loadings for scales.
+#'        Expected to have loadings corresponding to the scales specified in `scale_names`.
+#' @param scale_names A character vector specifying the names of the scales in the order
+#'        they appear in the factor analysis object loadings.
+#'
+#' @return A matrix with parties as row names and scales as column names, containing
+#'         scale scores for each party.
+#'
+#' @importFrom dplyr mutate arrange
+#' @importFrom tidyr pivot_wider
+#' @importFrom potgrowth compute_scale_scores
+#' @export
+#' @examples
+#' # Assuming `aggregated_issue_positions` and `factanal_object` are defined:
+#' scale_names <- c("souv_langfr", "libertarian", "woke", "laicite", "immigration", "lien3")
+#' party_scales <- compute_party_scales(aggregated_issue_positions,
+#'                                      factanal_object,
+#'                                      scale_names)
+#' print(party_scales)
+compute_party_scales <- function(aggregated_issue_positions,
+                                 factanal_object,
+                                 scale_names) {
+  ## put it into wide format for potgrowth::compute_scale_scores
+  wide <- aggregated_issue_positions %>%
+    tidyr::pivot_wider(., names_from = "VARIABLE",
+                       values_from = "position") %>%
+    mutate(party = factor(party, levels = unique(aggregated_issue_positions$party))) %>%
+    arrange(party)
+  ## check if rownames from df are in the same exact order as wide$party
+  if (sum((rownames(df) != wide$party)) > 0){
+    stop(message("Rownames from df are not in the same order as the party column in wide."))
+  }
+  party_scales_matrix <- sapply(X = 1:length(scale_names),
+                                FUN = potgrowth::compute_scale_scores,
+                                factanal_object = factanal_object,
+                                survey_data = wide)
+  rownames(party_scales_matrix) <- unique(aggregated_issue_positions$party)
+  colnames(party_scales_matrix) <- paste0("scale_", scale_names)
+  return(party_scales_matrix)
+}
+
+
+
