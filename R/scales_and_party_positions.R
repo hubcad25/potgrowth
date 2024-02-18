@@ -219,4 +219,113 @@ compute_attitude_gaps <- function(
 
 
 
+#' Retrieve Relative Confidence Indices (RCIs) for Parties
+#'
+#' This function extracts the Relative Confidence Indices (RCIs) for specified parties from a dataset. The RCI measures the confidence level relative to other indices.
+#'
+#' @param data A dataframe containing the dataset from which RCIs are to be retrieved.
+#' @param rci_columns_prefix A string specifying the prefix of the columns in `data` that contain RCI values. Defaults to "irc_".
+#' @param parties A vector of strings specifying the parties for which RCIs are to be retrieved. This parameter defaults to `potgrowth::qc_parties`, assuming `potgrowth` package contains a list of Quebec parties.
+#' @return A matrix containing the RCI values for the specified parties.
+#' @export
+#' @examples
+#' rcis <- retrieve_rcis(my_data, "irc_", c("party1", "party2"))
+retrieve_rcis <- function(data,
+                          rci_columns_prefix = "irc_",
+                          parties = potgrowth::qc_parties){
+  rcis <- sapply(parties,
+                 FUN = function(x) data[, paste0(rci_columns_prefix, x)])
+  return(rcis)
+}
+
+#' Retrieve Attitude Gaps for Parties
+#'
+#' This function calculates the attitude gaps for specified parties within given scales, excluding optionally the left-right scale. An attitude gap measures the difference in attitudes across different dimensions.
+#'
+#' @param data A dataframe containing the dataset from which attitude gaps are to be calculated.
+#' @param attitudegap_columns_prefix A string specifying the prefix of the columns in `data` related to attitude gaps.
+#' @param scale_columns_prefix A string specifying the prefix for scale columns in `data` from which the attitude gaps are calculated. Defaults to "scale".
+#' @param parties A vector of strings specifying the parties for which attitude gaps are to be calculated.
+#' @param remove_scale_leftRight A logical indicating whether to exclude the left-right scale from calculations. Defaults to TRUE.
+#' @return A list of matrices, each representing the attitude gaps for a row in `data`, structured by the specified scales and parties.
+#' @export
+#' @examples
+#' attitude_gaps <- retrieve_attitudegaps(my_data, "attitudegap_", "scale", c("party1", "party2"), TRUE)
+retrieve_attitudegaps <- function(data,
+                                  attitudegap_columns_prefix = "attitudegap_",
+                                  scale_columns_prefix = "scale",
+                                  parties = potgrowth::qc_parties,
+                                  remove_scale_leftRight = TRUE){
+  scales <- names(data %>% select(starts_with(scale_columns_prefix)))
+  if (isTRUE(remove_scale_leftRight)){
+    scales <- scales[scales != "scale_leftRight"]
+  }
+  message("lapply starting, you can expect to wait ~1.7 seconds by 1000 respondents.")
+  message(paste0("   So for ", nrow(data), " respondents, you can expect: ~",
+                 round(1.7 * (nrow(data) / 1000)), " seconds"))
+  start <- Sys.time()
+  gaps <- lapply(X = 1:nrow(data), function(row_index) {
+    gaps <- sapply(X = scales, function(scale) {
+      gaps <- 1- abs(data[row_index, paste0(attitudegap_columns_prefix, parties, "_", scale)])
+      return(gaps)
+    })
+    colnames <- colnames(gaps)
+    gaps <- matrix(unlist(gaps), nrow=5, byrow=TRUE)
+    rownames(gaps) <- parties
+    colnames(gaps) <- colnames
+    return(gaps)
+  })
+  elapsed <- Sys.time() - start
+  elapsed_secs <- as.numeric(elapsed, units = "secs")
+  message(paste0("lapply done in ", elapsed_secs, " seconds."))
+  return(gaps)
+}
+
+#' Compute Respondents' Saliency on Scales and Parties
+#'
+#' This function computes the correlation between Relative Confidence Indices (RCIs) and attitude gaps for respondents, indicating the saliency of different issues among different parties.
+#'
+#' @param data A dataframe containing the dataset to be analyzed.
+#' @param rci_columns_prefix A string specifying the prefix of the RCI columns in `data`.
+#' @param attitudegap_columns_prefix A string specifying the prefix of the attitude gap columns in `data`.
+#' @param scale_columns_prefix A string specifying the prefix for scale columns in `data` from which the attitude gaps are calculated.
+#' @param remove_scale_leftRight A logical indicating whether to exclude the left-right scale from calculations.
+#' @param parties A vector of strings specifying the parties for which the analysis is to be performed.
+#' @return A matrix with the correlation coefficients between RCIs and attitude gaps for each respondent, indicating the saliency of issues.
+#' @export
+#' @examples
+#' saliency <- compute_respondents_saliency(my_data, "irc_", "attitudegap_", "scale", TRUE, c("party1", "party2"))
+compute_respondents_saliency <- function(data,
+                                         rci_columns_prefix = "irc_",
+                                         attitudegap_columns_prefix = "attitudegap_",
+                                         scale_columns_prefix = "scale",
+                                         remove_scale_leftRight = TRUE,
+                                         parties = potgrowth::qc_parties){
+  rcis <- retrieve_rcis(
+    data = data,
+    rci_columns_prefix = rci_columns_prefix,
+    parties = parties
+  )
+  attitudegaps <-
+    retrieve_attitudegaps(
+      data = data,
+      attitudegap_columns_prefix = attitudegap_columns_prefix,
+      scale_columns_prefix = scale_columns_prefix,
+      parties = parties,
+      remove_scale_leftRight = remove_scale_leftRight
+    )
+  output <- sapply(
+    X = 1:nrow(data),
+    FUN = function(x) {
+      rcisx <- rcis[x,]
+      attitudegapsx <- attitudegaps[[x]]
+      cors <- cor(x = rcisx,
+                  y = attitudegapsx)[1, ]
+      return(cors)
+    }
+  )
+  output <- t(output)
+  return(output)
+}
+
 
