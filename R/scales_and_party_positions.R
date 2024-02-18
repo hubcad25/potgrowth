@@ -277,7 +277,7 @@ retrieve_attitudegaps <- function(data,
   })
   elapsed <- Sys.time() - start
   elapsed_secs <- as.numeric(elapsed, units = "secs")
-  message(paste0("lapply done in ", elapsed_secs, " seconds."))
+  message(paste0("lapply done in ", round(elapsed_secs), " seconds."))
   return(gaps)
 }
 
