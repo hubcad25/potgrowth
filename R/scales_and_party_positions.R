@@ -325,6 +325,8 @@ compute_respondents_saliency <- function(data,
     }
   )
   output <- t(output)
+  output <- as.data.frame(output)
+  names(output) <- paste0("adj_saliency_", names(output))
   return(output)
 }
 
