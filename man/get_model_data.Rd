@@ -6,7 +6,7 @@
 \usage{
 get_model_data(
   party,
-  model = c("vote_solidity", "potential_for_growth"),
+  model_type = c("vote_solidity", "potential_for_growth"),
   data,
   rci_prefix = "irc_",
   attitudegap_prefix = "attitudegap",
@@ -17,7 +17,7 @@ get_model_data(
 \arguments{
 \item{party}{The party to filter the data by.}
 
-\item{model}{A character string specifying the model to use.
+\item{model_type}{A character string specifying the model to use.
 Supported models are "vote_solidity" and "potential_for_growth".}
 
 \item{data}{A dataframe containing the data to be processed.}
@@ -42,7 +42,7 @@ filters by party, and selects specified columns.
 \examples{
 # Example usage:
 # get_model_data(party = "CAQ",
-#                model = "vote_solidity",
+#                model_type = "vote_solidity",
 #                data = your_dataframe,
 #                ses_and_vis_to_include = c(your_variables, starts_with("random_prefix")))
 }
