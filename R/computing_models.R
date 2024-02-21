@@ -6,7 +6,7 @@
 #' filters by party, and selects specified columns.
 #'
 #' @param party The party to filter the data by.
-#' @param model A character string specifying the model to use.
+#' @param model_type A character string specifying the model to use.
 #'   Supported models are "vote_solidity" and "potential_for_growth".
 #' @param data A dataframe containing the data to be processed.
 #' @param rci_prefix A character string specifying the prefix for RCI columns.
@@ -20,12 +20,12 @@
 #' @examples
 #' # Example usage:
 #' # get_model_data(party = "CAQ",
-#' #                model = "vote_solidity",
+#' #                model_type = "vote_solidity",
 #' #                data = your_dataframe,
 #' #                ses_and_vis_to_include = c(your_variables, starts_with("random_prefix")))
 get_model_data <- function(
     party,
-    model = c("vote_solidity", "potential_for_growth"),
+    model_type = c("vote_solidity", "potential_for_growth"),
     data,
     rci_prefix = "irc_",
     attitudegap_prefix = "attitudegap",
@@ -33,15 +33,15 @@ get_model_data <- function(
     ses_and_vis_to_include){
 
   # Verify model argument is valid
-  if (!model %in% c("vote_solidity", "potential_for_growth")) {
+  if (!model_type %in% c("vote_solidity", "potential_for_growth")) {
     stop("Invalid model selection. Choose either 'vote_solidity' or 'potential_for_growth'.", call. = FALSE)
   }
 
-  model <- match.arg(model) # Ensure 'model' matches one of the options
+  model_type <- match.arg(model_type) # Ensure 'model' matches one of the options
 
   ses_and_vis_to_include <- rlang::enquos(ses_and_vis_to_include)
 
-  if (model == "vote_solidity"){
+  if (model_type == "vote_solidity"){
     newdata <- data %>%
       tidyr::pivot_longer(., cols = starts_with(rci_prefix),
                           names_to = "party",
@@ -49,7 +49,7 @@ get_model_data <- function(
                           values_to = "rci") %>%
       group_by(id, source_id) %>%
       filter(rci == max(rci))
-  } else if (model == "potential_for_growth") {
+  } else if (model_type == "potential_for_growth") {
     newdata <- data %>%
       tidyr::pivot_longer(., cols = starts_with(rci_prefix),
                           names_to = "party",
@@ -106,4 +106,69 @@ get_voteint_model_data <- function(
                   starts_with(saliency_prefix),
                   !!!ses_and_vis_to_include)
   return(subset_data)
+}
+
+#' Linear Model with Interaction Terms Between Atittude Gaps and Issue Saliency
+#'
+#' Constructs and fits a linear model using a specified dependent variable and
+#' interaction terms between attitude gap variables and saliency variables.
+#' It automatically identifies variables starting with specified prefixes for
+#' attitude gaps and saliency, creates interaction terms between each pair of
+#' corresponding attitude and saliency variables, and includes these interactions
+#' in the linear model along with other variables included in data.
+#'
+#' @param data A dataframe containing the dataset for analysis.
+#' @param vd The name of the dependent variable in the model.
+#' @param attitudegap_prefix A character string specifying the prefix for attitude gap columns.
+#' @param saliency_prefix A character string specifying the prefix for saliency columns.
+#'
+#' @return A linear model object containing the fitted model with interaction terms.
+#' @export
+#'
+#' @examples
+#' # Assuming 'your_data' is a dataframe that contains a dependent variable 'rci',
+#' # and multiple attitude gap and saliency variables with respective prefixes:
+#' model <- lm_with_interactions(data = your_data,
+#'                               vd = "rci",
+#'                               attitudegap_prefix = "attitudegap",
+#'                               saliency_prefix = "adj_saliency")
+#' summary(model)
+lm_with_interactions <- function(
+    data,
+    vd = "rci",
+    attitudegap_prefix = "attitudegap",
+    saliency_prefix = "adj_saliency"
+)
+{
+  ## find variables that need interaction
+  ### variables that start with attitudegap_prefix and saliency_prefix
+  #### then we need to associate each variable to its variable
+  ### 1. attitudegap_columns
+  attitudegap_columns <- names(data %>% select(starts_with(attitudegap_prefix)))
+  ### 2. attitudegap_scales: attitudegap_columns when removing the prefix and _ that follows
+  attitudegap_scales <- gsub(paste0(attitudegap_prefix, "_"), "", attitudegap_columns)
+  ### 3. saliency_columns
+  saliency_columns <- names(data %>% select(starts_with(saliency_prefix)))
+  ### 4. saliency_scales: saliency_columns when removing the prefix and _ that follows
+  saliency_scales <- gsub(paste0(saliency_prefix, "_"), "", saliency_columns)
+  ## 5. check to make sure each attitudegap_scales is in saliency_scales and vice versa
+  if (sum(!(attitudegap_scales %in% saliency_scales)) > 0){
+    stop("Some scales containing attitude gaps do not have saliency values.")
+  }
+  if (sum(!(saliency_scales %in% attitudegap_scales)) > 0){
+    stop("Some scales containing saliency values do not have attitude gaps.")
+  }
+  ### 6. Create interaction term with all variables by associating each variable
+  #####  from attitudegap_columns with its equivalent in saliency_columns
+  interactions_vector <- sapply(
+    X = attitudegap_scales,
+    FUN = function(x) {
+      paste0(attitudegap_prefix, "_", x, " * ", saliency_prefix, "_", x)
+    }
+  )
+  interactions_terms <- paste0(interactions_vector, collapse = " + ")
+  formula <- as.formula(paste0(vd, " ~ . + ", interactions_terms))
+  model <- lm(formula = formula,
+              data = data)
+  return(model)
 }

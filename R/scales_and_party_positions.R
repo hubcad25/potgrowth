@@ -202,7 +202,7 @@ compute_attitude_gaps <- function(
       gaps_matrix <- sapply(
         X = scales,
         FUN = function(scale){
-          matrix <- survey_data[[scale]] - party_scales_matrix[party, scale]
+          matrix <- 1 - abs(survey_data[[scale]] - party_scales_matrix[party, scale])
           return(matrix)
         }
       )
