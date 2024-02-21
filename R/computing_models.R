@@ -203,7 +203,6 @@ lm_with_interactions <- function(
 #'
 #' @importFrom nnet multinom
 #' @import dplyr
-#' @importFrom stats setNames
 multinom_with_interactions <- function(
     data,
     parties,
@@ -215,7 +214,7 @@ multinom_with_interactions <- function(
   ### variables that start with attitudegap_prefix and saliency_prefix
   #### then we need to associate each variable to its variable
   ### 1. attitudegap_columns
-  attitudegap_columns <- names(data %>% select(starts_with(attitudegap_prefix)))
+  attitudegap_columns <- names(data %>% dplyr::select(starts_with(attitudegap_prefix)))
   ### 2. attitudegap_scales: attitudegap_columns when removing the prefix and _ that follows
   attitudegap_scales <- gsub(paste0(attitudegap_prefix, "_"), "", attitudegap_columns)
   for (i in parties){
@@ -223,7 +222,7 @@ multinom_with_interactions <- function(
   }
   attitudegap_scales <- unique(attitudegap_scales)
   ### 3. saliency_columns
-  saliency_columns <- names(data %>% select(starts_with(saliency_prefix)))
+  saliency_columns <- names(data %>% dplyr::select(starts_with(saliency_prefix)))
   ### 4. saliency_scales: saliency_columns when removing the prefix and _ that follows
   saliency_scales <- gsub(paste0(saliency_prefix, "_"), "", saliency_columns)
   ## 5. check to make sure each attitudegap_scales is in saliency_scales and vice versa
