@@ -172,3 +172,83 @@ lm_with_interactions <- function(
               data = data)
   return(model)
 }
+
+
+#' Multinomial Logistic Regression with Interaction Terms
+#'
+#' This function prepares and fits a multinomial logistic regression model using the `nnet` package,
+#' with a specified vote intention variable as the dependent variable. It automatically creates interaction terms
+#' between attitude gap variables and saliency variables for specified parties, incorporating these interactions
+#' into the model.
+#'
+#' @param data A dataframe containing the dataset for analysis.
+#' @param parties A character vector of party names to be used in creating interaction terms.
+#' @param vd The name of the vote intention variable in the dataset.
+#' @param attitudegap_prefix A character string specifying the prefix for attitude gap columns.
+#' @param saliency_prefix A character string specifying the prefix for saliency columns.
+#'
+#' @return A multinomial logistic regression model object from the `nnet` package.
+#' @export
+#'
+#' @examples
+#' # Assuming 'your_data' is a dataframe that contains a vote intention variable,
+#' # attitude gap variables, and saliency variables for different parties:
+#' parties <- c("Party1", "Party2")
+#' model <- multinom_with_interactions(data = your_data,
+#'                                     parties = parties,
+#'                                     vd = "voteInt",
+#'                                     attitudegap_prefix = "attitudegap",
+#'                                     saliency_prefix = "adj_saliency")
+#' summary(model)
+#'
+#' @importFrom nnet multinom
+#' @import dplyr
+#' @importFrom stats setNames
+multinom_with_interactions <- function(
+    data,
+    parties,
+    vd = "voteInt",
+    attitudegap_prefix = "attitudegap",
+    saliency_prefix = "adj_saliency"
+){
+  ## find variables that need interaction
+  ### variables that start with attitudegap_prefix and saliency_prefix
+  #### then we need to associate each variable to its variable
+  ### 1. attitudegap_columns
+  attitudegap_columns <- names(data %>% select(starts_with(attitudegap_prefix)))
+  ### 2. attitudegap_scales: attitudegap_columns when removing the prefix and _ that follows
+  attitudegap_scales <- gsub(paste0(attitudegap_prefix, "_"), "", attitudegap_columns)
+  for (i in parties){
+    attitudegap_scales <- gsub(paste0(i, "_"), "", attitudegap_scales)
+  }
+  attitudegap_scales <- unique(attitudegap_scales)
+  ### 3. saliency_columns
+  saliency_columns <- names(data %>% select(starts_with(saliency_prefix)))
+  ### 4. saliency_scales: saliency_columns when removing the prefix and _ that follows
+  saliency_scales <- gsub(paste0(saliency_prefix, "_"), "", saliency_columns)
+  ## 5. check to make sure each attitudegap_scales is in saliency_scales and vice versa
+  if (sum(!(attitudegap_scales %in% saliency_scales)) > 0){
+    stop("Some scales containing attitude gaps do not have saliency values.")
+  }
+  if (sum(!(saliency_scales %in% attitudegap_scales)) > 0){
+    stop("Some scales containing saliency values do not have attitude gaps.")
+  }
+  ### 6. Create interaction term with all variables by associating each variable
+  #####  from attitudegap_columns with its equivalent in saliency_columns
+  interactions_vector <- unlist(lapply(
+    X = parties,
+    FUN = function(party) {
+      party_vector <- sapply(
+        X = attitudegap_scales,
+        FUN = function(scale){
+          paste0(attitudegap_prefix, "_", party, "_", scale, " * ", saliency_prefix, "_", scale)
+        }
+      )
+    }
+  ))
+  interactions_terms <- paste0(interactions_vector, collapse = " + ")
+  formula <- as.formula(paste0(vd, " ~ . + ", interactions_terms))
+  model <- nnet::multinom(formula = formula,
+                          data = data)
+  return(model)
+}
