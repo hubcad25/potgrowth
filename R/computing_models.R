@@ -70,5 +70,40 @@ get_model_data <- function(
   return(subset_data)
 }
 
-
-
+#' Get Data for Vote Intention Model
+#'
+#' This function filters and selects columns from a dataset based on criteria relevant for
+#' analyzing vote intention. It selects the vote intention variable, attitude gap variables,
+#' saliency variables, and any additional socio-economic status (SES) and visibility (vis)
+#' variables specified by the user.
+#'
+#' @param data A dataframe containing the data to be processed.
+#' @param voteint_variable The name of the vote intention variable in the dataset.
+#' @param attitudegap_prefix A character string specifying the prefix for attitude gap columns.
+#' @param saliency_prefix A character string specifying the prefix for saliency columns.
+#' @param ses_and_vis_to_include Variables to include in the final dataset, passed as unquoted names. These should
+#'   be socio-economic status (SES) and visibility (vis) variables that the user wishes to retain for analysis.
+#'
+#' @return A dataframe containing the selected columns based on the specified criteria.
+#' @export
+#'
+#' @examples
+#' # Assuming 'your_data' is your dataset and it contains variables for vote intention,
+#' # attitude gaps, saliency, and specific SES and visibility variables you are interested in:
+#' get_voteint_model_data(data = your_data,
+#'                        voteint_variable = "voteInt",
+#'                        ses_and_vis_to_include = c("age", "education"))
+get_voteint_model_data <- function(
+    data,
+    voteint_variable = "voteInt",
+    attitudegap_prefix = "attitudegap",
+    saliency_prefix = "adj_saliency",
+    ses_and_vis_to_include
+){
+  ses_and_vis_to_include <- rlang::enquos(ses_and_vis_to_include)
+  subset_data <- data %>%
+    dplyr::select(all_of(voteint_variable), starts_with(attitudegap_prefix),
+                  starts_with(saliency_prefix),
+                  !!!ses_and_vis_to_include)
+  return(subset_data)
+}
