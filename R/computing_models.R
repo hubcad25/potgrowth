@@ -301,7 +301,7 @@ iv_model <- function(
     model <- lm(formula = formula,
                 data = model_data)
   } else if (model_type == "multinom"){
-    model <- nnet:multinom(formula = formula,
+    model <- nnet::multinom(formula = formula,
                             data = model_data)
   }
   return(model)
