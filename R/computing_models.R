@@ -253,36 +253,56 @@ votemodel_multinom <- function(
 }
 
 
-#' Independant Variable (IV) Linear Model
+#' Independent Variable (IV) Regression Model
 #'
-#' Fits a linear model to predict a specified independant variable (IV) based on
+#' Fits a model to predict a specified independent variable (IV) based on
 #' one or more socio-economic status (SES) variables provided by the user. This function
-#' is designed to facilitate the creation of linear models by abstracting away the formula
-#' creation process and directly using column names provided as strings.
+#' is designed to facilitate the creation of models by abstracting away the formula
+#' creation process and directly using column names provided as strings. It supports
+#' fitting both linear models (using ordinary least squares) and multinomial logistic
+#' regression models.
 #'
 #' @param data A dataframe containing the dataset for the analysis.
-#' @param iv_to_predict A string specifying the name of the independant variable that
+#' @param iv_to_predict A string specifying the name of the independent variable that
 #'   the model will predict. This variable should be present in `data`.
 #' @param ses A character vector of names of socio-economic status (SES) variables
 #'   included as predictors in the model. These variables should be present in `data`.
+#' @param model_type A string that specifies the type of regression model to fit.
+#'   Accepts "lm" for linear regression and "multinom" for multinomial logistic regression.
+#'   Defaults to "lm".
 #'
-#' @return An object of class `lm` representing the fitted linear model.
+#' @return An object representing the fitted model. The class of the object will
+#'   depend on the `model_type` parameter: an object of class `lm` for linear models
+#'   or class `nnet` for multinomial logistic regression models.
 #' @export
 #'
 #' @examples
-#' # Assuming 'df' is your dataframe, 'attitude_on_immigration' is the independant variable, and
+#' # Assuming 'df' is your dataframe, 'attitude_on_immigration' is the independent variable, and
 #' # 'age' and 'education' are SES variables:
-#' model <- iv_model(data = df, iv_to_predict = "attitude_on_immigration", ses = c("age", "education"))
-#' summary(model)
+#' # For a linear model:
+#' model_lm <- iv_model(data = df, iv_to_predict = "attitude_on_immigration", ses = c("age", "education"), model_type = "lm")
+#' summary(model_lm)
+#' # For a multinomial logistic regression model:
+#' model_multinom <- iv_model(data = df, iv_to_predict = "attitude_on_immigration", ses = c("age", "education"), model_type = "multinom")
+#' summary(model_multinom)
 iv_model <- function(
     data,
     iv_to_predict,
-    ses
+    ses,
+    model_type = "lm"
 ){
+  if (!(model_type %in% c("lm", "multinom"))) {
+    stop("Only 'lm' and 'multinom' are accepted as model_type.")
+  }
   model_data <- data %>%
     select(all_of(c(iv_to_predict, ses)))
   formula <- as.formula(paste0(iv_to_predict, " ~ ."))
-  model <- lm(formula = formula,
-              data = model_data)
+  if (model_type == "lm"){
+    model <- lm(formula = formula,
+                data = model_data)
+  } else if (model_type == "multinom"){
+    model <- nnet:multinom(formula = formula,
+                            data = model_data)
+  }
   return(model)
 }
