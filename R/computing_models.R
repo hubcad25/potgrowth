@@ -128,12 +128,12 @@ get_voteint_model_data <- function(
 #' @examples
 #' # Assuming 'your_data' is a dataframe that contains a dependent variable 'rci',
 #' # and multiple attitude gap and saliency variables with respective prefixes:
-#' model <- lm_with_interactions(data = your_data,
+#' model <- votemodel_lm(data = your_data,
 #'                               vd = "rci",
 #'                               attitudegap_prefix = "attitudegap",
 #'                               saliency_prefix = "adj_saliency")
 #' summary(model)
-lm_with_interactions <- function(
+votemodel_lm <- function(
     data,
     vd = "rci",
     attitudegap_prefix = "attitudegap",
@@ -194,7 +194,7 @@ lm_with_interactions <- function(
 #' # Assuming 'your_data' is a dataframe that contains a vote intention variable,
 #' # attitude gap variables, and saliency variables for different parties:
 #' parties <- c("Party1", "Party2")
-#' model <- multinom_with_interactions(data = your_data,
+#' model <- votemodel_multinom(data = your_data,
 #'                                     parties = parties,
 #'                                     vd = "voteInt",
 #'                                     attitudegap_prefix = "attitudegap",
@@ -203,7 +203,7 @@ lm_with_interactions <- function(
 #'
 #' @importFrom nnet multinom
 #' @import dplyr
-multinom_with_interactions <- function(
+votemodel_multinom <- function(
     data,
     parties,
     vd = "voteInt",
