@@ -251,3 +251,38 @@ votemodel_multinom <- function(
                           data = data)
   return(model)
 }
+
+
+#' Independant Variable (IV) Linear Model
+#'
+#' Fits a linear model to predict a specified independant variable (IV) based on
+#' one or more socio-economic status (SES) variables provided by the user. This function
+#' is designed to facilitate the creation of linear models by abstracting away the formula
+#' creation process and directly using column names provided as strings.
+#'
+#' @param data A dataframe containing the dataset for the analysis.
+#' @param iv_to_predict A string specifying the name of the independant variable that
+#'   the model will predict. This variable should be present in `data`.
+#' @param ses A character vector of names of socio-economic status (SES) variables
+#'   included as predictors in the model. These variables should be present in `data`.
+#'
+#' @return An object of class `lm` representing the fitted linear model.
+#' @export
+#'
+#' @examples
+#' # Assuming 'df' is your dataframe, 'attitude_on_immigration' is the independant variable, and
+#' # 'age' and 'education' are SES variables:
+#' model <- iv_model(data = df, iv_to_predict = "attitude_on_immigration", ses = c("age", "education"))
+#' summary(model)
+iv_model <- function(
+    data,
+    iv_to_predict,
+    ses
+){
+  model_data <- data %>%
+    select(all_of(c(iv_to_predict, ses)))
+  formula <- as.formula(paste0(iv_to_predict, " ~ ."))
+  model <- lm(formula = formula,
+              data = model_data)
+  return(model)
+}
