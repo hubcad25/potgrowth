@@ -48,7 +48,8 @@ get_model_data <- function(
                           names_prefix = rci_prefix,
                           values_to = "rci") %>%
       group_by(id, source_id) %>%
-      filter(rci == max(rci))
+      filter(rci == max(rci) &
+               rci >= 0)
   } else if (model_type == "potential_for_growth") {
     newdata <- data %>%
       tidyr::pivot_longer(., cols = starts_with(rci_prefix),
