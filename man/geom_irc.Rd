@@ -12,7 +12,8 @@ geom_irc(
   conf_high_vote,
   estimate_vote,
   irc_conf_int_color = "black",
-  ...
+  ...,
+  base_size = 3.5
 )
 }
 \arguments{

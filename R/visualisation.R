@@ -25,20 +25,21 @@
 #'            aes(color = your_color_variable))
 geom_irc <- function(conf_low_irc, conf_high_irc, estimate_irc,
                      conf_low_vote, conf_high_vote, estimate_vote,
-                     irc_conf_int_color = "black", ...) {
+                     irc_conf_int_color = "black", ...,
+                     base_size = 3.5) {
   list(
     geom_linerange(aes(ymin = conf_low_irc, ymax = conf_high_irc),
-                   color = irc_conf_int_color, size = 1, ...),
+                   color = irc_conf_int_color, size = 0.29 * base_size, ...),
     geom_linerange(aes(ymin = estimate_irc - 0.05, ymax = estimate_irc + 0.05),
-                   size = 3.5, color = "grey80", ...),
+                   size = base_size, color = "grey80", ...),
     geom_linerange(aes(ymin = estimate_irc - 0.05,
                        ymax = estimate_irc - 0.05 + estimate_vote * 0.1),
-                   size = 3.5, alpha = 0.3, ...),
+                   size = base_size, alpha = 0.3, ...),
     geom_linerange(aes(ymin = estimate_irc - 0.05 + conf_low_vote * 0.1,
                        ymax = estimate_irc - 0.05 + conf_high_vote * 0.1),
-                   size = 1.75, alpha = 0.1, ...),
+                   size = 0.5 * base_size, alpha = 0.1, ...),
     geom_text(aes(y = estimate_irc - 0.045 + estimate_vote * 0.1,
                   label = paste0(round(estimate_vote * 100), "%")),
-              angle = 90, vjust = -1.2, size = 1.5)
+              angle = 90, vjust = -1.2, size = 0.57 * base_size, color = "black")
   )
 }
