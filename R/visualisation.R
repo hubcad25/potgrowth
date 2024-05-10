@@ -36,6 +36,9 @@ geom_irc <- function(conf_low_irc, conf_high_irc, estimate_irc,
                    size = 3.5, alpha = 0.3, ...),
     geom_linerange(aes(ymin = estimate_irc - 0.05 + conf_low_vote * 0.1,
                        ymax = estimate_irc - 0.05 + conf_high_vote * 0.1),
-                   size = 1.75, alpha = 0.1, ...)
+                   size = 1.75, alpha = 0.1, ...),
+    geom_text(aes(y = estimate_irc - 0.045 + estimate_vote * 0.1,
+                  label = paste0(round(estimate_vote * 100), "%")),
+              angle = 90, vjust = -1.2, size = 1.5)
   )
 }
