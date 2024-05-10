@@ -1,64 +1,41 @@
-#' Create Custom Geom for IRC Visualization
+#' Create a Composite Geom for IRC and Vote Estimates
 #'
-#' This function creates a custom geom designed specifically for visualizing
-#' the IRC along with its confidence intervals and other related estimates.
-#' It adds multiple `geom_linerange` layers to a ggplot object, using color as an aesthetic.
+#' This function creates a list of `geom_linerange` elements to represent the
+#' confidence intervals and estimates for IRC and vote values.
 #'
-#' @param mapping Set of aesthetic mappings created by `aes()` or `aes_()`.
-#'   Expected aesthetics are `conf_low_irc`, `conf_high_irc`, `estimate_irc`,
-#'   `estimate_vote`, `conf_low_vote`, `conf_high_vote`, and `color`.
-#' @param data Optional dataset to use for the layer.
-#' @param ... Additional parameters for fine-tuning the `geom_linerange` components,
-#'   such as `size` and `alpha`.
-#' @return A ggplot2 layer.
+#' @param conf_low_irc Lower bound of the IRC confidence interval.
+#' @param conf_high_irc Upper bound of the IRC confidence interval.
+#' @param estimate_irc Point estimate for IRC.
+#' @param conf_low_vote Lower bound of the vote confidence interval.
+#' @param conf_high_vote Upper bound of the vote confidence interval.
+#' @param estimate_vote Point estimate for the vote.
+#' @param irc_conf_int_color Color for the IRC confidence interval. Default is "black".
+#' @param ... Additional parameters passed to `geom_linerange`.
+#'
+#' @return A list of `geom_linerange` objects for use with ggplot2.
+#' @import ggplot2
 #' @examples
-#' df <- data.frame(
-#'   conf_low_irc = rnorm(10, 0.1, 0.05),
-#'   conf_high_irc = rnorm(10, 0.2, 0.05),
-#'   estimate_irc = rnorm(10, 0.15, 0.05),
-#'   estimate_vote = runif(10, 0.4, 0.6),
-#'   conf_low_vote = runif(10, 0.35, 0.45),
-#'   conf_high_vote = runif(10, 0.55, 0.65),
-#'   color = rep(c("red", "blue"), each = 5)
-#' )
-#' ggplot(df, aes(conf_low_irc = conf_low_irc, conf_high_irc = conf_high_irc,
-#'                estimate_irc = estimate_irc, estimate_vote = estimate_vote,
-#'                conf_low_vote = conf_low_vote, conf_high_vote = conf_high_vote,
-#'                color = color)) +
-#'   geom_irc()
-#' @export
-geom_irc <- function(mapping = NULL, data = NULL, ...) {
-  # Check for necessary aesthetics and report missing ones
-  required_aes <- c("conf_low_irc", "conf_high_irc", "estimate_irc", "estimate_vote", "conf_low_vote", "conf_high_vote", "color")
-  if (!is.null(mapping)) {
-    provided_aes <- names(mapping$aes)
-    missing_aes <- setdiff(required_aes, provided_aes)
-    if (length(missing_aes) > 0) {
-      stop("Missing required aesthetics: ", paste(missing_aes, collapse = ", "), call. = FALSE)
-    }
-  }
-
-  layer(
-    stat = "identity",
-    data = data,
-    mapping = mapping,
-    geom = GeomIrc,
-    position = "identity",
-    show.legend = NA,
-    inherit.aes = TRUE,
-    params = list(...)
+#' ggplot(data, aes(x = your_x_variable, y = your_y_variable)) +
+#'   geom_irc(conf_low_irc = your_data$conf_low_irc,
+#'            conf_high_irc = your_data$conf_high_irc,
+#'            estimate_irc = your_data$estimate_irc,
+#'            conf_low_vote = your_data$conf_low_vote,
+#'            conf_high_vote = your_data$conf_high_vote,
+#'            estimate_vote = your_data$estimate_vote,
+#'            aes(color = your_color_variable))
+geom_irc <- function(conf_low_irc, conf_high_irc, estimate_irc,
+                     conf_low_vote, conf_high_vote, estimate_vote,
+                     irc_conf_int_color = "black", ...) {
+  list(
+    geom_linerange(aes(ymin = conf_low_irc, ymax = conf_high_irc),
+                   color = irc_conf_int_color, size = 1, ...),
+    geom_linerange(aes(ymin = estimate_irc - 0.05, ymax = estimate_irc + 0.05),
+                   size = 3.5, color = "grey80", ...),
+    geom_linerange(aes(ymin = estimate_irc - 0.05,
+                       ymax = estimate_irc - 0.05 + estimate_vote * 0.1),
+                   size = 3.5, alpha = 0.3, ...),
+    geom_linerange(aes(ymin = estimate_irc - 0.05 + conf_low_vote * 0.1,
+                       ymax = estimate_irc - 0.05 + conf_high_vote * 0.1),
+                   size = 1.75, alpha = 0.1, ...)
   )
 }
-
-# Define the custom Geom for geom_irc
-GeomIrc <- ggproto('GeomIrc', Geom,
-                   required_aes = c("y", "ymin", "ymax", "color"),
-                   draw_group = function(data, panel_params, coord, ...) {
-                     grobTree(
-                       geom_linerange(data = data, color = "black", aes(ymin = data$conf_low_irc, ymax = data$conf_high_irc), ...),
-                       geom_linerange(data = data, aes(ymin = data$estimate_irc - 0.05, ymax = data$estimate_irc + 0.05), ...),
-                       geom_linerange(data = data, aes(ymin = data$estimate_irc - 0.05, ymax = data$estimate_irc - 0.05 + data$estimate_vote * 0.1), ...),
-                       geom_linerange(data = data, aes(ymin = data$estimate_irc - 0.05 + data$conf_low_vote * 0.1, ymax = data$estimate_irc - 0.05 + data$conf_high_vote * 0.1), ...)
-                     )
-                   }
-)

@@ -2,41 +2,50 @@
 % Please edit documentation in R/visualisation.R
 \name{geom_irc}
 \alias{geom_irc}
-\title{Create Custom Geom for IRC Visualization}
+\title{Create a Composite Geom for IRC and Vote Estimates}
 \usage{
-geom_irc(mapping = NULL, data = NULL, ...)
+geom_irc(
+  conf_low_irc,
+  conf_high_irc,
+  estimate_irc,
+  conf_low_vote,
+  conf_high_vote,
+  estimate_vote,
+  irc_conf_int_color = "black",
+  ...
+)
 }
 \arguments{
-\item{mapping}{Set of aesthetic mappings created by `aes()` or `aes_()`.
-Expected aesthetics are `conf_low_irc`, `conf_high_irc`, `estimate_irc`,
-`estimate_vote`, `conf_low_vote`, `conf_high_vote`, and `color`.}
+\item{conf_low_irc}{Lower bound of the IRC confidence interval.}
 
-\item{data}{Optional dataset to use for the layer.}
+\item{conf_high_irc}{Upper bound of the IRC confidence interval.}
 
-\item{...}{Additional parameters for fine-tuning the `geom_linerange` components,
-such as `size` and `alpha`.}
+\item{estimate_irc}{Point estimate for IRC.}
+
+\item{conf_low_vote}{Lower bound of the vote confidence interval.}
+
+\item{conf_high_vote}{Upper bound of the vote confidence interval.}
+
+\item{estimate_vote}{Point estimate for the vote.}
+
+\item{irc_conf_int_color}{Color for the IRC confidence interval. Default is "black".}
+
+\item{...}{Additional parameters passed to `geom_linerange`.}
 }
 \value{
-A ggplot2 layer.
+A list of `geom_linerange` objects for use with ggplot2.
 }
 \description{
-This function creates a custom geom designed specifically for visualizing
-the IRC along with its confidence intervals and other related estimates.
-It adds multiple `geom_linerange` layers to a ggplot object, using color as an aesthetic.
+This function creates a list of `geom_linerange` elements to represent the
+confidence intervals and estimates for IRC and vote values.
 }
 \examples{
-df <- data.frame(
-  conf_low_irc = rnorm(10, 0.1, 0.05),
-  conf_high_irc = rnorm(10, 0.2, 0.05),
-  estimate_irc = rnorm(10, 0.15, 0.05),
-  estimate_vote = runif(10, 0.4, 0.6),
-  conf_low_vote = runif(10, 0.35, 0.45),
-  conf_high_vote = runif(10, 0.55, 0.65),
-  color = rep(c("red", "blue"), each = 5)
-)
-ggplot(df, aes(conf_low_irc = conf_low_irc, conf_high_irc = conf_high_irc,
-               estimate_irc = estimate_irc, estimate_vote = estimate_vote,
-               conf_low_vote = conf_low_vote, conf_high_vote = conf_high_vote,
-               color = color)) +
-  geom_irc()
+ggplot(data, aes(x = your_x_variable, y = your_y_variable)) +
+  geom_irc(conf_low_irc = your_data$conf_low_irc,
+           conf_high_irc = your_data$conf_high_irc,
+           estimate_irc = your_data$estimate_irc,
+           conf_low_vote = your_data$conf_low_vote,
+           conf_high_vote = your_data$conf_high_vote,
+           estimate_vote = your_data$estimate_vote,
+           aes(color = your_color_variable))
 }
