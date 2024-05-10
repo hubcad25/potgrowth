@@ -13,5 +13,6 @@ Imports:
   readODS,
   tools,
   dplyr,
-  tidyr
+  tidyr,
+  ggplot2
 RoxygenNote: 7.3.1

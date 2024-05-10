@@ -2,25 +2,27 @@
 % Please edit documentation in R/visualisation.R
 \name{geom_irc}
 \alias{geom_irc}
-\title{Create Custom Geom Layers for IRC Visualization}
+\title{Create Custom Geom for IRC Visualization}
 \usage{
-geom_irc(mapping = NULL, ...)
+geom_irc(mapping = NULL, data = NULL, ...)
 }
 \arguments{
-\item{mapping}{Set of aesthetic mappings created by `aes()` or `aes_()`. Expected aesthetics
-are `conf_low_irc`, `conf_high_irc`, `estimate_irc`, `estimate_vote`, `conf_low_vote`, `conf_high_vote`.}
+\item{mapping}{Set of aesthetic mappings created by `aes()` or `aes_()`.
+Expected aesthetics are `conf_low_irc`, `conf_high_irc`, `estimate_irc`,
+`estimate_vote`, `conf_low_vote`, `conf_high_vote`, and `color`.}
 
-\item{...}{Additional parameters for fine-tuning the `geom_linerange` components, such as `size` and `alpha`.}
+\item{data}{Optional dataset to use for the layer.}
 
-\item{color}{The default color for the lines, which can be overridden individually in each `geom_linerange`.}
+\item{...}{Additional parameters for fine-tuning the `geom_linerange` components,
+such as `size` and `alpha`.}
 }
 \value{
-A list of `geom_linerange` layers.
+A ggplot2 layer.
 }
 \description{
-This function returns layers of `geom_linerange` designed specifically for visualizing
-the IRC along with its confidence intervals and other
-related estimates. The function is intended to be added to an existing `ggplot` object.
+This function creates a custom geom designed specifically for visualizing
+the IRC along with its confidence intervals and other related estimates.
+It adds multiple `geom_linerange` layers to a ggplot object, using color as an aesthetic.
 }
 \examples{
 df <- data.frame(
@@ -29,10 +31,12 @@ df <- data.frame(
   estimate_irc = rnorm(10, 0.15, 0.05),
   estimate_vote = runif(10, 0.4, 0.6),
   conf_low_vote = runif(10, 0.35, 0.45),
-  conf_high_vote = runif(10, 0.55, 0.65)
+  conf_high_vote = runif(10, 0.55, 0.65),
+  color = rep(c("red", "blue"), each = 5)
 )
 ggplot(df, aes(conf_low_irc = conf_low_irc, conf_high_irc = conf_high_irc,
                estimate_irc = estimate_irc, estimate_vote = estimate_vote,
-               conf_low_vote = conf_low_vote, conf_high_vote = conf_high_vote)) +
+               conf_low_vote = conf_low_vote, conf_high_vote = conf_high_vote,
+               color = color)) +
   geom_irc()
 }
