@@ -30,7 +30,7 @@ geom_irc <- function(conf_low_irc, conf_high_irc, estimate_irc,
   list(
     geom_linerange(aes(ymin = conf_low_irc, ymax = conf_high_irc),
                    color = irc_conf_int_color, size = 0.29 * base_size, ...),
-    geom_linerange(aes(ymin = estimate_irc - 0.05, ymax = estimate_irc + 0.05),
+    geom_linerange(aes(ymin = conf_low_irc + 0.075, ymax = conf_high_irc - 0.075),
                    size = base_size, color = "grey80", ...),
     geom_linerange(aes(ymin = estimate_irc - 0.05,
                        ymax = estimate_irc - 0.05 + estimate_vote * 0.1),
