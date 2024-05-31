@@ -13,7 +13,8 @@ geom_irc(
   estimate_vote,
   irc_conf_int_color = "black",
   ...,
-  base_size = 3.5
+  base_size = 3.5,
+  dodge = 0
 )
 }
 \arguments{
@@ -32,6 +33,10 @@ geom_irc(
 \item{irc_conf_int_color}{Color for the IRC confidence interval. Default is "black".}
 
 \item{...}{Additional parameters passed to `geom_linerange`.}
+
+\item{base_size}{Base size for text and line elements. Default is 3.5.}
+
+\item{dodge}{Amount to dodge the elements. Default is 0.}
 }
 \value{
 A list of `geom_linerange` objects for use with ggplot2.

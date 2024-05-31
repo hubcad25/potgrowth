@@ -11,6 +11,8 @@
 #' @param estimate_vote Point estimate for the vote.
 #' @param irc_conf_int_color Color for the IRC confidence interval. Default is "black".
 #' @param ... Additional parameters passed to `geom_linerange`.
+#' @param base_size Base size for text and line elements. Default is 3.5.
+#' @param dodge Amount to dodge the elements. Default is 0.
 #'
 #' @return A list of `geom_linerange` objects for use with ggplot2.
 #' @import ggplot2

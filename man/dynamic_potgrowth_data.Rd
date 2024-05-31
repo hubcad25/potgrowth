@@ -2,7 +2,7 @@
 % Please edit documentation in R/predict_models.R
 \name{dynamic_potgrowth_data}
 \alias{dynamic_potgrowth_data}
-\title{Dynamically Model and Predict Potential Growth Data with SES Interactions}
+\title{Predict Dynamic Potential for Growth Data with SES Interactions}
 \usage{
 dynamic_potgrowth_data(
   data,
