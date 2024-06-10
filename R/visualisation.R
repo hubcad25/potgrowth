@@ -75,8 +75,8 @@ geom_irc <- function(conf_low_irc, conf_high_irc, estimate_irc,
 #'
 #' @export
 generate_progress_bar <- function(percentage) {
-  filled_blocks = round(percentage * 100)
-  empty_blocks = 100 - filled_blocks
+  filled_blocks = round(percentage * 10)
+  empty_blocks = 10 - filled_blocks
   paste0(
     strrep("█", filled_blocks),
     strrep("░", empty_blocks),
