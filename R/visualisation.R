@@ -50,3 +50,37 @@ geom_irc <- function(conf_low_irc, conf_high_irc, estimate_irc,
               angle = 90, vjust = -1.2, size = 0.57 * base_size, color = "black")
   )
 }
+
+#' Generate a Text-Based Progress Bar
+#'
+#' This function generates a text-based progress bar using Unicode characters.
+#' The progress bar visually represents the percentage completion as a series
+#' of filled and empty blocks.
+#'
+#' @param percentage A numeric value between 0 and 1 representing the percentage
+#'   completion. For example, 0.75 represents 75% completion.
+#'
+#' @return A character string representing the progress bar. The progress bar
+#'   consists of filled blocks (`█`), empty blocks (`░`), and a percentage value.
+#'   The returned string is suitable for use in text-based outputs, such as
+#'   console messages or tooltips in graphical displays.
+#'
+#' @examples
+#' # Example usage:
+#' generate_progress_bar(0.75)
+#' # [1] "█████████░ 75%"
+#'
+#' generate_progress_bar(0.3)
+#' # [1] "███░░░░░░░ 30%"
+#'
+#' @export
+generate_progress_bar <- function(percentage) {
+  filled_blocks = round(percentage * 100)
+  empty_blocks = 100 - filled_blocks
+  paste0(
+    strrep("█", filled_blocks),
+    strrep("░", empty_blocks),
+    " ", round(percentage * 100), "%"
+  )
+}
+
