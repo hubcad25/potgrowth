@@ -212,7 +212,7 @@ get_quarto_graph <- function(survey_data, issue_slug, choices, xlabel) {
                          showarrow = FALSE,
                          yanchor='auto',
                          xref = 'paper', x = 0,
-                         yref = 'paper', y = -0.45),
+                         yref = 'paper', y = -0.65),
       autosize = FALSE,
       margin = list(l = 50, r = 50, b = 150, t = 50)
     )
