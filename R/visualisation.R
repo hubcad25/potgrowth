@@ -84,3 +84,138 @@ generate_progress_bar <- function(percentage) {
   )
 }
 
+
+
+#' Generate a Quarto Graph
+#'
+#' This function generates a Plotly graph for a given issue and survey data, with specific handling for the "iss_nationalisme_souv" issue.
+#'
+#' @param survey_data A data frame containing the survey data. It should include columns for `issue` and `position`.
+#' @param issue_slug A string indicating the issue identifier.
+#' @param choices A named vector of choices for the positions.
+#' @param xlabel A string for the x-axis label.
+#'
+#' @return A Plotly graph object.
+#' @import dplyr
+#' @import plotly
+#' @export
+#'
+#' @examples
+#' survey_data <- data.frame(issue = c("iss_nationalisme_souv", "iss_other"),
+#'                           position = c(0.25, 0.75),
+#'                           other_columns = c(1, 2))
+#' choices <- c("0.25" = "Low", "0.75" = "High")
+#' xlabel <- "Position"
+#' get_quarto_graph(survey_data, "iss_nationalisme_souv", choices, xlabel)
+get_quarto_graph <- function(survey_data, issue_slug, choices, xlabel) {
+  if (issue_slug == "iss_nationalisme_souv") {
+    distribution <- survey_data %>%
+      filter(issue == issue_slug) %>%
+      mutate(position = ifelse(position == 0.25, 0.33, position),
+             position = ifelse(position == 0.75, 0.67, position)) %>%
+      group_by(position) %>%
+      summarise(n = n()) %>%
+      mutate(prop = n / sum(n),
+             estimate_irc = (-1 + prop))
+  } else {
+    distribution <- survey_data %>%
+      filter(issue == issue_slug) %>%
+      group_by(position) %>%
+      summarise(n = n()) %>%
+      mutate(prop = n / sum(n),
+             estimate_irc = (-1 + prop))
+  }
+  graph_data <- potgrowth::dynamic_potgrowth_data(
+    data = survey_data,
+    parties = potgrowth::qc_parties,
+    issues = issue_slug,
+  ) %>%
+    mutate(
+      estimate_irc = ifelse(estimate_irc > 0, 0, estimate_irc),
+      estimate_irc = ifelse(estimate_irc < -1, -1, estimate_irc),
+      conf_low_irc = ifelse(conf_low_irc > 0, 0, conf_low_irc),
+      conf_low_irc = ifelse(conf_low_irc < -1, -1, conf_low_irc))
+  if (issue_slug == "iss_nationalisme_souv") {
+    graph_data <- graph_data %>%
+      mutate(
+        position = ifelse(position == 0.25, 0.33, position),
+        position = ifelse(position == 0.75, 0.67, position)
+      ) %>%
+      filter(position != "0.5") %>%
+      left_join(party_positions, by = c("party", "issue")) %>%
+      mutate(is_party_position = ifelse(position == party_position, 1, 0))
+  } else {
+    graph_data <- graph_data %>%
+      left_join(party_positions, by = c("party", "issue")) %>%
+      mutate(is_party_position = ifelse(position == party_position, 1, 0))
+  }
+  graph_data2 <- as.data.frame(graph_data) %>%
+    mutate(sd = (conf_high_irc - conf_low_irc) / 2,
+           progress_bar = sapply(estimate_vote, potgrowth::generate_progress_bar),
+           line_opacity = ifelse(is_party_position == 1, 0.3, 0),
+           xticklabel = choices[position])
+  party_positions <- graph_data2 %>%
+    filter(is_party_position == 1)
+  # Créer le graphique Plotly avec des barres en arrière-plan et un axe y secondaire
+  p <- plot_ly(
+    colors = potgrowth::qc_party_colors,
+    width = 690) %>%
+    add_markers(data = party_positions,
+                text = ~paste0(party, "'s position:\n", xticklabel),
+                hoverinfo = "text",
+                x = ~position,
+                y = ~estimate_irc,
+                split = ~party,
+                color = ~party,
+                legendgroup = ~party,
+                colors = potgrowth::qc_party_colors,
+                marker = list(size = 40,
+                              symbol = "diamond",
+                              opacity = ~line_opacity),
+                showlegend = FALSE) %>%
+    add_lines(data = graph_data2,
+              line = list(width = 1),
+              showlegend = FALSE,
+              x = ~position,
+              y = ~estimate_irc,
+              split = ~party,
+              color = ~party,
+              legendgroup = ~party,
+              colors = potgrowth::qc_party_colors,
+              hoverinfo = "none") %>%
+    add_markers(x = ~position,
+                y = ~estimate_irc,
+                split = ~party,
+                color = ~party,
+                legendgroup = ~party,
+                marker = list(size = 11),
+                error_y = list(array = ~ sd),
+                text = ~paste0("Acquired votes in segment<br>", progress_bar),
+                hoverinfo = 'text') %>%
+    layout(
+      yaxis = list(range = c(-1, 0),
+                   title = list(text = "Potential for Growth\n(predicted RCI of non-voters)",
+                                standoff = 30),
+                   tickvals = seq(from = -1, to = 0, by = 0.1),
+                   ticktext = paste0(seq(from = -10, to = 0, by = 1), "   "),
+                   zeroline = FALSE),
+      xaxis = list(title = paste0("\n", xlabel, "\n"),
+                   tickvals = names(choices),
+                   ticktext = choices,
+                   tickfont = list(size = 9.5),
+                   ticklabelposition = "outside",
+                   zeroline = FALSE),
+      annotations = list(text = "Diamonds indicate the parties' positions on the issue. Data from 2022.",
+                         font = list(size = 10),
+                         standoff = 30,
+                         showarrow = FALSE,
+                         yanchor='auto',
+                         xref = 'paper', x = 0,
+                         yref = 'paper', y = -0.4),
+      autosize = FALSE,
+      margin = list(l = 50, r = 50, b = 150, t = 50)
+    )
+  return(p)
+}
+
+
