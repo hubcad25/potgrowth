@@ -195,26 +195,25 @@ get_quarto_graph <- function(survey_data, issue_slug, choices, xlabel) {
     layout(
       yaxis = list(range = c(-1, 0),
                    title = list(text = "Potential for Growth\n(predicted RCI of non-voters)",
-                                standoff = 30),
+                                standoff = 15),
                    tickvals = seq(from = -1, to = 0, by = 0.1),
                    ticktext = paste0(seq(from = -10, to = 0, by = 1), "   "),
                    zeroline = FALSE),
-      xaxis = list(title = list(text = paste0("\n", xlabel, "\n"),
-                                standoff = 20),
+      xaxis = list(title = list(text = paste0("\n", xlabel, "\n")),
                    tickvals = names(choices),
                    ticktext = choices,
                    tickfont = list(size = 9.5),
                    ticklabelposition = "outside",
                    zeroline = FALSE),
-      annotations = list(text = "Diamonds indicate the parties' positions on the issue. Data from 2022.",
-                         font = list(size = 10),
-                         standoff = 30,
-                         showarrow = FALSE,
-                         yanchor='auto',
-                         xref = 'paper', x = 0,
-                         yref = 'paper', y = -0.65),
+      #annotations = list(text = "Diamonds indicate the parties' positions on the issue. Data from 2022.",
+      #                   font = list(size = 10),
+      #                   #standoff = 30,
+      #                   showarrow = FALSE,
+      #                   yanchor='auto',
+      #                   xref = 'paper', x = 0,
+      #                   yref = 'paper', y = -0.65),
       autosize = FALSE,
-      margin = list(l = 50, r = 50, b = 150, t = 50)
+      margin = list(l = 25, r = 25, b = 25, t = 25)
     )
   return(p)
 }
