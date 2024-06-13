@@ -199,7 +199,8 @@ get_quarto_graph <- function(survey_data, issue_slug, choices, xlabel) {
                    tickvals = seq(from = -1, to = 0, by = 0.1),
                    ticktext = paste0(seq(from = -10, to = 0, by = 1), "   "),
                    zeroline = FALSE),
-      xaxis = list(title = paste0("\n", xlabel, "\n"),
+      xaxis = list(title = list(text = paste0("\n", xlabel, "\n"),
+                                standoff = 20),
                    tickvals = names(choices),
                    ticktext = choices,
                    tickfont = list(size = 9.5),
@@ -211,7 +212,7 @@ get_quarto_graph <- function(survey_data, issue_slug, choices, xlabel) {
                          showarrow = FALSE,
                          yanchor='auto',
                          xref = 'paper', x = 0,
-                         yref = 'paper', y = -0.525),
+                         yref = 'paper', y = -0.45),
       autosize = FALSE,
       margin = list(l = 50, r = 50, b = 150, t = 50)
     )
