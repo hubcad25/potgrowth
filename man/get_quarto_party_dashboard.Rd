@@ -9,7 +9,8 @@ get_quarto_party_dashboard(
   survey_data,
   issues_df,
   party_positions,
-  remove_variables_from_models
+  remove_variables_from_models,
+  width = 700
 )
 }
 \arguments{
