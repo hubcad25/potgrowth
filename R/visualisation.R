@@ -236,7 +236,7 @@ get_quarto_graph <- function(survey_data,
 #' p <- get_quarto_party_dashboard(party, survey_data, issues_df, party_positions, remove_variables_from_models)
 #' p
 #' }
-get_quarto_party_dashboard <- function(party, survey_data, issues_df, party_positions, remove_variables_from_models) {
+get_quarto_party_dashboard <- function(party, survey_data, issues_df, party_positions, remove_variables_from_models, width = 700) {
   model_variables <- eval(formals(potgrowth::dynamic_potgrowth_data)$model_variables)
   model_variables <- model_variables[!model_variables %in% remove_variables_from_models]
   graph_data <- potgrowth::dynamic_potgrowth_data(
@@ -270,7 +270,7 @@ get_quarto_party_dashboard <- function(party, survey_data, issues_df, party_posi
     dplyr::filter(is_party_position == 1)
   p <- plot_ly(
     colors = issue_colors,
-    width = 775, height = 600) %>%
+    width = width) %>%
     add_markers(data = party_positions,
                 hoverinfo = "none",
                 x = ~position,
