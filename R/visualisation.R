@@ -122,32 +122,32 @@ get_quarto_graph <- function(survey_data,
     issues = issue_slug,
     model_variables = model_variables
   ) %>%
-    mutate(
+    dplyr::mutate(
       estimate_irc = ifelse(estimate_irc > 0, 0, estimate_irc),
       estimate_irc = ifelse(estimate_irc < -1, -1, estimate_irc),
       conf_low_irc = ifelse(conf_low_irc > 0, 0, conf_low_irc),
       conf_low_irc = ifelse(conf_low_irc < -1, -1, conf_low_irc))
   if (issue_slug == "iss_nationalisme_souv") {
     graph_data <- graph_data %>%
-      mutate(
+      dplyr::mutate(
         position = ifelse(position == 0.25, 0.33, position),
         position = ifelse(position == 0.75, 0.67, position)
       ) %>%
-      filter(position != "0.5") %>%
-      left_join(party_positions, by = c("party", "issue")) %>%
-      mutate(is_party_position = ifelse(position == party_position, 1, 0))
+      dplyr::filter(position != "0.5") %>%
+      dplyr::left_join(party_positions, by = c("party", "issue")) %>%
+      dplyr::mutate(is_party_position = ifelse(position == party_position, 1, 0))
   } else {
     graph_data <- graph_data %>%
-      left_join(party_positions, by = c("party", "issue")) %>%
-      mutate(is_party_position = ifelse(position == party_position, 1, 0))
+      dplyr::left_join(party_positions, by = c("party", "issue")) %>%
+      dplyr::mutate(is_party_position = ifelse(position == party_position, 1, 0))
   }
   graph_data2 <- as.data.frame(graph_data) %>%
-    mutate(sd = (conf_high_irc - conf_low_irc) / 2,
+    dplyr::mutate(sd = (conf_high_irc - conf_low_irc) / 2,
            progress_bar = sapply(estimate_vote, potgrowth::generate_progress_bar),
            line_opacity = ifelse(is_party_position == 1, 0.3, 0),
            xticklabel = choices[position])
   party_positions <- graph_data2 %>%
-    filter(is_party_position == 1)
+    dplyr::filter(is_party_position == 1)
   # Créer le graphique Plotly avec des barres en arrière-plan et un axe y secondaire
   p <- plot_ly(
     colors = potgrowth::qc_party_colors,
@@ -245,21 +245,21 @@ get_quarto_party_dashboard <- function(party, survey_data, issues_df, party_posi
     issues = issues_df$issue_slug,
     model_variables = model_variables
   ) %>%
-    mutate(
+    dplyr::mutate(
       estimate_irc = ifelse(estimate_irc > 0, 0, estimate_irc),
       estimate_irc = ifelse(estimate_irc < -1, -1, estimate_irc),
       conf_low_irc = ifelse(conf_low_irc > 0, 0, conf_low_irc),
       conf_low_irc = ifelse(conf_low_irc < -1, -1, conf_low_irc),
       position = ifelse(position == 0.25, 0.33, position),
       position = ifelse(position == 0.75, 0.67, position)) %>%
-    filter(position != 0.5) %>%
-    left_join(party_positions, by = c("party", "issue")) %>%
-    mutate(is_party_position = ifelse(position == party_position, 1, 0))
+    dplyr::filter(position != 0.5) %>%
+    dplyr::left_join(party_positions, by = c("party", "issue")) %>%
+    dplyr::mutate(is_party_position = ifelse(position == party_position, 1, 0))
   issue_labels_vec <- setNames(issues_df$issue_label, issues_df$issue_slug)
   labels0 <- setNames(issues_df$label0, issues_df$issue_slug)
   labels1 <- setNames(issues_df$label1, issues_df$issue_slug)
   graph_data2 <- as.data.frame(graph_data) %>%
-    mutate(sd = (conf_high_irc - conf_low_irc) / 2,
+    dplyr::mutate(sd = (conf_high_irc - conf_low_irc) / 2,
            progress_bar = sapply(estimate_vote, potgrowth::generate_progress_bar),
            line_opacity = ifelse(is_party_position == 1, 0.3, 0),
            issue_label = issue_labels_vec[issue],
@@ -267,7 +267,7 @@ get_quarto_party_dashboard <- function(party, survey_data, issues_df, party_posi
            position_label = ifelse(position == 1, labels1[issue], position_label)
     )
   party_positions <- graph_data2 %>%
-    filter(is_party_position == 1)
+    dplyr::filter(is_party_position == 1)
   p <- plot_ly(
     colors = issue_colors,
     width = 800, height = 750) %>%
