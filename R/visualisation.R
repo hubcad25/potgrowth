@@ -222,6 +222,8 @@ get_quarto_graph <- function(survey_data,
 #' @param remove_variables_from_models A character vector of variables to be removed from the model.
 #'
 #' @return A `plotly` object representing the party dashboard.
+#' @import dplyr
+#' @import plotly
 #' @export
 #'
 #' @examples
