@@ -4,7 +4,14 @@
 \alias{get_quarto_graph}
 \title{Generate a Quarto Graph}
 \usage{
-get_quarto_graph(survey_data, issue_slug, choices, xlabel)
+get_quarto_graph(
+  survey_data,
+  issue_slug,
+  party_positions,
+  choices,
+  xlabel,
+  remove_variables_from_models = NULL
+)
 }
 \arguments{
 \item{survey_data}{A data frame containing the survey data. It should include columns for `issue` and `position`.}

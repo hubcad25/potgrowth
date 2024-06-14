@@ -109,6 +109,7 @@ generate_progress_bar <- function(percentage) {
 #' get_quarto_graph(survey_data, "iss_nationalisme_souv", choices, xlabel)
 get_quarto_graph <- function(survey_data,
                              issue_slug,
+                             party_positions,
                              choices,
                              xlabel,
                              remove_variables_from_models = NULL
@@ -203,6 +204,123 @@ get_quarto_graph <- function(survey_data,
       #                   yanchor='auto',
       #                   xref = 'paper', x = 0,
       #                   yref = 'paper', y = -0.65),
+      autosize = FALSE,
+      margin = list(l = 25, r = 25, b = 25, t = 25)
+    )
+  return(p)
+}
+
+
+#' Generate Quarto Party Dashboard
+#'
+#' This function generates a party dashboard using `plotly` based on survey data, issues data frame, and party positions.
+#'
+#' @param party A character vector indicating the party.
+#' @param survey_data A data frame containing the survey data.
+#' @param issues_df A data frame containing issue slugs, labels, and position labels.
+#' @param party_positions A data frame containing party positions on issues.
+#' @param remove_variables_from_models A character vector of variables to be removed from the model.
+#'
+#' @return A `plotly` object representing the party dashboard.
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' party <- "PartyName"
+#' survey_data <- data.frame(...) # Provide your survey data here
+#' issues_df <- data.frame(issue_slug = c("issue1", "issue2"), issue_label = c("Issue 1", "Issue 2"), label0 = c("Less", "Less"), label1 = c("More", "More"))
+#' party_positions <- data.frame(...) # Provide your party positions data here
+#' remove_variables_from_models <- c("variable1", "variable2")
+#' p <- get_quarto_party_dashboard(party, survey_data, issues_df, party_positions, remove_variables_from_models)
+#' p
+#' }
+get_quarto_party_dashboard <- function(party, survey_data, issues_df, party_positions, remove_variables_from_models) {
+  model_variables <- eval(formals(potgrowth::dynamic_potgrowth_data)$model_variables)
+  model_variables <- model_variables[!model_variables %in% remove_variables_from_models]
+  graph_data <- potgrowth::dynamic_potgrowth_data(
+    data = survey_data,
+    parties = party,
+    issues = issues_df$issue_slug,
+    model_variables = model_variables
+  ) %>%
+    mutate(
+      estimate_irc = ifelse(estimate_irc > 0, 0, estimate_irc),
+      estimate_irc = ifelse(estimate_irc < -1, -1, estimate_irc),
+      conf_low_irc = ifelse(conf_low_irc > 0, 0, conf_low_irc),
+      conf_low_irc = ifelse(conf_low_irc < -1, -1, conf_low_irc),
+      position = ifelse(position == 0.25, 0.33, position),
+      position = ifelse(position == 0.75, 0.67, position)) %>%
+    filter(position != 0.5) %>%
+    left_join(party_positions, by = c("party", "issue")) %>%
+    mutate(is_party_position = ifelse(position == party_position, 1, 0))
+  issue_labels_vec <- setNames(issues_df$issue_label, issues_df$issue_slug)
+  labels0 <- setNames(issues_df$label0, issues_df$issue_slug)
+  labels1 <- setNames(issues_df$label1, issues_df$issue_slug)
+  graph_data2 <- as.data.frame(graph_data) %>%
+    mutate(sd = (conf_high_irc - conf_low_irc) / 2,
+           progress_bar = sapply(estimate_vote, potgrowth::generate_progress_bar),
+           line_opacity = ifelse(is_party_position == 1, 0.3, 0),
+           issue_label = issue_labels_vec[issue],
+           position_label = ifelse(position == 0, labels0[issue], ""),
+           position_label = ifelse(position == 1, labels1[issue], position_label)
+    )
+  party_positions <- graph_data2 %>%
+    filter(is_party_position == 1)
+  p <- plot_ly(
+    colors = issue_colors,
+    width = 800, height = 750) %>%
+    add_markers(data = party_positions,
+                hoverinfo = "none",
+                x = ~position,
+                y = ~estimate_irc,
+                split = ~issue,
+                color = ~issue,
+                legendgroup = ~issue,
+                colors = issue_colors,
+                marker = list(size = 40,
+                              symbol = "diamond",
+                              opacity = ~line_opacity),
+                showlegend = FALSE) %>%
+    add_lines(data = graph_data2,
+              line = list(width = 1),
+              showlegend = FALSE,
+              x = ~position,
+              y = ~estimate_irc,
+              split = ~issue,
+              color = ~issue,
+              legendgroup = ~issue,
+              colors = issue_colors,
+              hoverinfo = "none") %>%
+    add_markers(x = ~position,
+                y = ~estimate_irc,
+                split = ~issue,
+                color = ~issue,
+                legendgroup = ~issue,
+                name = ~issue_label,
+                marker = list(size = 11),
+                error_y = list(array = ~ sd),
+                text = ~paste0(issue_label, ", ", position_label, "\nAcquired votes in segment<br>", progress_bar),
+                hoverinfo = 'text') %>%
+    layout(
+      legend = list(
+        x = 4,
+        xanchor = 'right',
+        traceorder = 'normal',
+        itemsizing = 'constant',
+        ncol = 2,
+        title = list(text = ''), # Enlever le titre de la légende
+        tracegroupgap = 20 # Espace entre les groupes
+      ),
+      yaxis = list(range = c(-1, 0),
+                   title = list(text = "Potential for Growth\n(predicted RCI of non-voters)",
+                                standoff = 15),
+                   tickvals = seq(from = -1, to = 0, by = 0.1),
+                   ticktext = paste0(seq(from = -10, to = 0, by = 1), "   "),
+                   zeroline = FALSE),
+      xaxis = list(title = list(text = "Position on the issue"),
+                   tickvals = c(0, 0.33, 0.67, 1),
+                   ticktext = c("", "", "", ""),
+                   zeroline = FALSE),
       autosize = FALSE,
       margin = list(l = 25, r = 25, b = 25, t = 25)
     )
