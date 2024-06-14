@@ -305,6 +305,7 @@ get_quarto_party_dashboard <- function(party, survey_data, issues_df, party_posi
                 hoverinfo = 'text') %>%
     layout(
       legend = list(
+        font = list(size = 8),
         x = 4,
         xanchor = 'right',
         traceorder = 'normal',
