@@ -270,7 +270,7 @@ get_quarto_party_dashboard <- function(party, survey_data, issues_df, party_posi
     dplyr::filter(is_party_position == 1)
   p <- plot_ly(
     colors = issue_colors,
-    width = 800, height = 750) %>%
+    width = 775, height = 600) %>%
     add_markers(data = party_positions,
                 hoverinfo = "none",
                 x = ~position,

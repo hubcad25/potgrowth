@@ -73,18 +73,18 @@ dynamic_potgrowth_data <- function(
   }
   model_variables <- model_variables[!(model_variables %in% ses_interactions)]
   data_model <- data %>%
-    select(irc, voter, party, issue, position, all_of(ses_interactions), all_of(model_variables))
+    dplyr::select(irc, voter, party, issue, position, all_of(ses_interactions), all_of(model_variables))
   ## for each party
   for (i in 1:length(parties)){
     partyi <- parties[i]
     data_model_party <- data_model %>%
-      filter(party == partyi)
+      dplyr::filter(party == partyi)
     ## for each issue
     for (j in 1:length(issues)){
       issue_j <- issues[j]
       data_model_j <- data_model_party %>%
-        filter(issue == issue_j) %>%
-        mutate(position = factor(position, ordered = FALSE))
+        dplyr::filter(issue == issue_j) %>%
+        dplyr::mutate(position = factor(position, ordered = FALSE))
       data_model_j$position <- relevel(data_model_j$position,
                                        ref = potgrowth::mode(data_model_j$position))
       ## if no ses_interactions
