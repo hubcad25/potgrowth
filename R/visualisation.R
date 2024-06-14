@@ -107,28 +107,19 @@ generate_progress_bar <- function(percentage) {
 #' choices <- c("0.25" = "Low", "0.75" = "High")
 #' xlabel <- "Position"
 #' get_quarto_graph(survey_data, "iss_nationalisme_souv", choices, xlabel)
-get_quarto_graph <- function(survey_data, issue_slug, choices, xlabel) {
-  if (issue_slug == "iss_nationalisme_souv") {
-    distribution <- survey_data %>%
-      filter(issue == issue_slug) %>%
-      mutate(position = ifelse(position == 0.25, 0.33, position),
-             position = ifelse(position == 0.75, 0.67, position)) %>%
-      group_by(position) %>%
-      summarise(n = n()) %>%
-      mutate(prop = n / sum(n),
-             estimate_irc = (-1 + prop))
-  } else {
-    distribution <- survey_data %>%
-      filter(issue == issue_slug) %>%
-      group_by(position) %>%
-      summarise(n = n()) %>%
-      mutate(prop = n / sum(n),
-             estimate_irc = (-1 + prop))
-  }
+get_quarto_graph <- function(survey_data,
+                             issue_slug,
+                             choices,
+                             xlabel,
+                             remove_variables_from_models = NULL
+                             ) {
+  model_variables <- eval(formals(potgrowth::dynamic_potgrowth_data)$model_variables)
+  model_variables <- model_variables[!model_variables %in% remove_variables_from_models]
   graph_data <- potgrowth::dynamic_potgrowth_data(
     data = survey_data,
     parties = potgrowth::qc_parties,
     issues = issue_slug,
+    model_variables = model_variables
   ) %>%
     mutate(
       estimate_irc = ifelse(estimate_irc > 0, 0, estimate_irc),
