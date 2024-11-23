@@ -17,4 +17,4 @@ Imports:
   ggplot2,
   marginaleffects,
   plotly
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
