@@ -19,6 +19,10 @@ gamma_model <- function(formula, link = "identity", data, plot = TRUE) {
   # Calculate shape and scale
   shape <- summary(model)$dispersion
   scale <- as.numeric(coef(model)["(Intercept)"]) / shape
+  # Check that scale is strictly positive
+  if (scale <= 0) {
+    scale <- 1e-6
+  }
   
   # Plot if required
   if (plot) {
