@@ -26,7 +26,7 @@ gamma_model <- function(formula, link = "identity", data, plot = TRUE) {
   mu <- exp(linear_predictor)  # For log link
 
   # Calculate scale for each observation
-  scale <- mu / shape
+  scale <- mean(mu) / shape
 
   #scale <- as.numeric(coef(model)["(Intercept)"]) / shape
   ## Check that scale is strictly positive
