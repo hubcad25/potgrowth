@@ -16,5 +16,6 @@ Imports:
   tidyr,
   ggplot2,
   marginaleffects,
-  plotly
+  plotly,
+  statmod
 RoxygenNote: 7.3.2
