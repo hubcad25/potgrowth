@@ -4,10 +4,12 @@
 \alias{gamma_model}
 \title{Fits a Gamma regression model to data and plots the estimated and real density}
 \usage{
-gamma_model(formula, data, plot = TRUE)
+gamma_model(formula, link = "identity", data, plot = TRUE)
 }
 \arguments{
 \item{formula}{A formula specifying the response and predictor variables.}
+
+\item{link}{The link function to use for the model. By default, the "identity" link is used.}
 
 \item{data}{A dataframe containing the variables in the formula.}
 
