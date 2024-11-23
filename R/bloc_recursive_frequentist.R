@@ -39,12 +39,16 @@ gamma_model <- function(formula, link = "identity", data, plot = TRUE) {
     p <- ggplot2::ggplot(data, aes(x = response_var)) +
       ggplot2::geom_histogram(aes(y = after_stat(density), fill = "Histogramme réel"), bins = 10, color = NA, alpha = 0.7) +
       ggplot2::geom_density(aes(color = "Densité réelle"), alpha = 0.5, fill = "#FF6666") +
-      ggplot2::stat_function(fun = stats::dgamma, args = list(shape = shape, scale = scale), aes(color = "Densité estimée (Gamma)")) +
+      ggplot2::stat_function(fun = function(x) {
+        # Normalisation de la densité Gamma pour correspondre à l'échelle
+        stats::dgamma(x, shape = shape, scale = scale) / 
+          sum(stats::dgamma(seq(min(data$response_var), max(data$response_var), length.out = 1000), 
+                            shape = shape, scale = scale)) * diff(range(data$response_var))
+      }, aes(color = "Densité estimée (Gamma)")) +
       ggplot2::scale_fill_manual(name = "Légende", values = c("Histogramme réel" = "grey")) +
       ggplot2::scale_color_manual(name = "Légende", values = c("Densité réelle" = "red", "Densité estimée (Gamma)" = "blue")) +
       ggplot2::theme_minimal() +
-      ggplot2::scale_x_continuous(limits = c(0.05, 1)) +
-      ggplot2::labs(title = "Comparaison de la densité réelle et estimée", x = response_var, y = "Densité")
+      ggplot2::labs(title = "Comparaison de la densité réelle et estimée", x = "Response Variable", y = "Densité")
     print(p)
     model$plot <- p
   }
