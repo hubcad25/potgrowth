@@ -43,6 +43,7 @@ gamma_model <- function(formula, link = "identity", data, plot = TRUE) {
       ggplot2::scale_fill_manual(name = "Légende", values = c("Histogramme réel" = "grey")) +
       ggplot2::scale_color_manual(name = "Légende", values = c("Densité réelle" = "red", "Densité estimée (Gamma)" = "blue")) +
       ggplot2::theme_minimal() +
+      ggplot2::scale_x_continuous(limits = c(0.05, 1)) +
       ggplot2::labs(title = "Comparaison de la densité réelle et estimée", x = response_var, y = "Densité")
     print(p)
     model$plot <- p
