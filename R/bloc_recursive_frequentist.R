@@ -68,7 +68,7 @@ gamma_model <- function(formula, link = "identity", data, plot = TRUE) {
 #' @importFrom ggplot2 ggplot geom_histogram geom_density stat_function scale_fill_manual scale_color_manual labs
 #' @importFrom statmod dinvgauss
 #' @export
-inverse_gaussian_model <- function(formula, link = "identity", data, plot = TRUE) {
+inverse_gaussian_model <- function(formula, link = "log", data, plot = TRUE) {
   # Transform the response variable
   response_var <- all.vars(formula)[1]
   data[[response_var]] <- (data[[response_var]] + 1) / 2
@@ -109,7 +109,7 @@ inverse_gaussian_model <- function(formula, link = "identity", data, plot = TRUE
       ggplot2::scale_fill_manual(name = "Légende", values = c("Histogramme réel" = "grey")) +
       ggplot2::scale_color_manual(name = "Légende", values = c("Densité réelle" = "red", "Densité estimée (Inverse Gaussian)" = "blue")) +
       ggplot2::theme_minimal() +
-      ggplot2::labs(title = "Comparaison de la densité réelle et estimée", x = "Response Variable", y = "Densité")
+      ggplot2::labs(title = "Comparaison de la densité réelle et estimée", x = response_var, y = "Densité")
     print(p)
     model$plot <- p
   }
