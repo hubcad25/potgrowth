@@ -134,6 +134,7 @@ inverse_gaussian_model <- function(formula, link = "log", data, plot = TRUE) {
 #' @return A linear model object with a diagnostic_plot attribute.
 #' 
 #' @importFrom ggplot2 autoplot
+#' @import ggfortify
 #' 
 #' @examples
 #' # Example with mtcars dataset
@@ -145,6 +146,7 @@ lm_with_residuals <- function(formula, data) {
   # Create the linear model
   model <- lm(formula, data)
   # Generate diagnostic plots using autoplot
+  library(ggfortify)
   diagnostic_plot <- ggplot2::autoplot(model, which = 1:4, ncol = 2)
   # Add the plot to the model object as an attribute
   model$diagnostic_plot <- diagnostic_plot
