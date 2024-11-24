@@ -4,7 +4,7 @@
 \alias{inverse_gaussian_model}
 \title{Fits an Inverse Gaussian regression model to data and plots the estimated and real density}
 \usage{
-inverse_gaussian_model(formula, link = "identity", data, plot = TRUE)
+inverse_gaussian_model(formula, link = "log", data, plot = TRUE)
 }
 \arguments{
 \item{formula}{A formula specifying the response and predictor variables.}

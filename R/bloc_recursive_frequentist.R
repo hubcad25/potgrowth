@@ -120,3 +120,36 @@ inverse_gaussian_model <- function(formula, link = "log", data, plot = TRUE) {
   
   return(model)
 }
+
+
+#' Generate diagnostic plots for a linear model
+#'
+#' This function creates a linear model from a given formula and data, generates
+#' diagnostic plots using autoplot, and adds the plot to the model object as an
+#' attribute.
+#'
+#' @param formula A formula specifying the response and predictor variables.
+#' @param data A dataframe containing the variables in the formula.
+#'
+#' @return A linear model object with a diagnostic_plot attribute.
+#' 
+#' @importFrom ggplot2 autoplot
+#' 
+#' @examples
+#' # Example with mtcars dataset
+#' data(mtcars)
+#' model <- lm_with_residuals(mpg ~ wt, data = mtcars)
+#' 
+#' @export
+lm_with_residuals <- function(formula, data) {
+  # Create the linear model
+  model <- lm(formula, data)
+  # Generate diagnostic plots using autoplot
+  diagnostic_plot <- ggplot2::autoplot(model, which = 1:4, ncol = 2)
+  # Add the plot to the model object as an attribute
+  model$diagnostic_plot <- diagnostic_plot
+  # Print the plot
+  print(diagnostic_plot)
+  # Return the model object with the plot attribute
+  return(model)
+}
