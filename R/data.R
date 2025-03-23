@@ -40,3 +40,36 @@ qc_parties <- c("CAQ", "PLQ", "PQ", "QS", "PCQ")
 #' @usage data(party_colors)
 #' @export
 qc_party_colors <- c("CAQ" = "#00cccc", "PLQ" = "#ED1A2D", "PQ" = "#004C9D", "QS" = "#FF5605", "PCQ" = "purple")
+
+
+#' Canada Federal Parties
+#'
+#' A vector of Canada federal party codes.
+#'
+#' @format A character vector of 6 elements.
+#' @usage data(can_parties)
+#' @export
+can_parties <- c(
+  "lpc" = "PLC",
+  "cpc" = "PCC",
+  "bq" = "BQ",
+  "ndp" = "NPD",
+  "gpc" = "PVC",
+  "ppc" = "PPC"
+)
+
+#' Canada Parties' Colors
+#'
+#' A named vector mapping party codes to their colors.
+#'
+#' @format A named vector of 5 elements.
+#' @usage data(can_party_colors)
+#' @export
+can_party_colors <- c(
+  "bq" = "#87CEFA",
+  "lpc" = "#d71b1f",
+  "cpc" = "#1d4881",
+  "ndp" = "#f89922",
+  "gpc" = "#3d9b35",
+  "ppc" = "#442d7b"
+)
