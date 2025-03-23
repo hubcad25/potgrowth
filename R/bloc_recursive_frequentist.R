@@ -133,6 +133,9 @@ inverse_gaussian_model <- function(formula, link = "log", data, plot = TRUE) {
 #'
 #' @return A linear model object with a diagnostic_plot attribute.
 #' 
+#' For more information on linear regression assumptions and diagnostics, visit:
+#' \url{https://www.sthda.com/english/articles/39-regression-model-diagnostics/161-linear-regression-assumptions-and-diagnostics-in-r-essentials/}
+#' 
 #' @importFrom ggplot2 autoplot
 #' @import ggfortify
 #' 
