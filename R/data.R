@@ -73,3 +73,5 @@ can_party_colors <- c(
   "gpc" = "#3d9b35",
   "ppc" = "#442d7b"
 )
+
+

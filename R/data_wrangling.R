@@ -54,3 +54,38 @@ compute_rci <- function(df, prefix, id_col) {
       names_prefix = "rci_"
     )
 }
+
+
+#' Parse Money Vector
+#'
+#' This function processes a vector of monetary values, parsing each value into a numeric form. The function handles
+#' specific floor and ceiling values differently by using specified limits and an increment for ceilings.
+#'
+#' @param values A vector of monetary values as strings to be parsed.
+#' @param sep A character string specifying the separator used in monetary ranges.
+#' @param floor The floor value to be specifically handled.
+#' @param ceiling The ceiling value to be specifically handled.
+#' @param ceiling_increment A numeric value to increment ceilings by, defaults to 10000.
+#'
+#' @return A numeric vector where each element is the parsed and rounded mean of the corresponding input value.
+#'
+#' @examples
+#' # Example usage:
+#' # parse_money_vector(values = c("1000-2000", "floor", "ceiling"), sep = "-", floor = "floor", ceiling = "ceiling")
+#'
+#' @importFrom sondr parse_money_range
+#' @export
+parse_money_vector <- function(values, sep, floor, ceiling, ceiling_increment = 10000) {
+  sapply(values, function(value) {
+    if (is.na(value) || value == "") {
+      return(NA)
+    }
+    if (value == floor) {
+      round(mean(sondr::parse_money_range(value, limit = "floor")))
+    } else if (value == ceiling) {
+      round(mean(sondr::parse_money_range(value, limit = "ceiling", ceiling_increment = ceiling_increment)))
+    } else {
+      round(mean(sondr::parse_money_range(value, sep)))
+    }
+  })
+}
