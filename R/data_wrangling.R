@@ -23,7 +23,7 @@
 #' @export
 compute_rci <- function(df, prefix, id_col) {
   df |>
-    dplyr::select(dplyr::all_of(id_col), dplyr::starts_with(prefix), -dplyr::starts_with(paste0(prefix, "Qc"))) |>
+    dplyr::select(dplyr::all_of(id_col), dplyr::starts_with(prefix)) |>
     tidyr::pivot_longer(
       cols = dplyr::starts_with(prefix),
       names_to = "party",
@@ -51,9 +51,11 @@ compute_rci <- function(df, prefix, id_col) {
       id_cols = dplyr::all_of(id_col),
       names_from = party,
       values_from = rci,
-      names_prefix = "rci_"
+      names_prefix = "rci_",
+      values_fn = mean # <--- ajout clé pour gérer les doublons
     )
 }
+
 
 
 #' Parse Money Vector
